@@ -1,0 +1,214 @@
+<html>
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+     
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>    
+<body>
+ 
+<script>
+    var latlng, map, 
+    getdata = function(searchterm) {
+      
+      if (!searchterm) {
+        removeChildren = function(item){
+          for (var i=0;i<arguments.length;i++) {
+            $("#"+arguments[i]).empty();
+          }
+        }("name","fullname","capital","area","map","flag");
+      }
+      
+      $.get("getdata.php?q="+ searchterm, function(data) {
+          var json = JSON.parse(data);
+          console.log(json);
+          printInfo = function(item){
+            for (var i=0;i<arguments.length;i++) {
+              $("#"+arguments[i]).html(json[arguments[i]]);
+            }
+            $("#area").append(" km<sup>2<sup>")
+          }("name","fullname","capital","area");
+
+          var latlng = json.latlng.split(","),
+          lat = latlng[0],
+          lng = latlng[1];
+          getmap(lat,lng);
+    
+          var flagImage = document.createElement("img");
+          var flagURL = encodeURI("http://www.sciencekids.co.nz/images/pictures/flags680/" + json.name + ".jpg");
+          flagImage.setAttribute("src",flagURL);
+          
+          $.ajax(flagURL)
+            .done( $("#flag").append(flagImage) )
+            .fail( $("#flag").empty());
+      
+          var googleSearchKey = encodeURIComponent(json.name + " scenery");
+          $.getJSON("https://www.googleapis.com/customsearch/v1?key=AIzaSyBb0YPdOboCV0PBr4FqVOlMWYESVS7X2JA&=016679254827430169043:ahmjbym2lhs&searchType=image&num=3&q=" + googleSearchKey)
+        .done(function(data) {
+          console.log(data);
+          for (var i=0;i<arguments.length; i++) {
+            var searchImage = document.createElement("img");
+            searchImage.setAttribute("src",data.items[i].link);
+            $("#"+arguments[i]).html(searchImage);
+          }
+        }("image1","image2","image3")
+        
+        )
+        
+      });
+      
+    
+    };
+    
+    
+    $(document).ready(function() {
+        $("#searchresult").load("getdata.php");
+        console.log("document.ready");
+
+        $("#searchfield").keyup(function() {
+            getdata(this.value);
+            console.log(this.value);
+            
+            if (this.value == null) {
+                
+            }
+        })
+    });
+
+    function initialize() {}
+    
+    getmap = function initMap(latp,lngp) {
+        
+        var wildlifeMapType = new google.maps.StyledMapType([
+            {
+              featureType: "water",
+              elementType: "geometry",
+              stylers: [
+                { color: "#45d9f6" }
+              ]
+            },{
+              featureType: "administrative.country",
+              elementType: "labels.text",
+              stylers: [
+                { visibility: "on" }
+              ]
+            },{
+              featureType: "water",
+              elementType: "labels.text",
+              stylers: [
+                { visibility: "off" }
+              ]
+            },{
+              featureType: "landscape",
+              elementType: "labels",
+              stylers: [
+                { visibility: "off" }
+              ]
+            },{
+              featureType: "administrative.province",
+              stylers: [
+                { visibility: "off" }
+              ]
+            },{
+              featureType: "landscape",
+              elementType: "labels.text",
+              stylers: [
+                { visibility: "off" }
+              ]
+            },{
+              featureType: "poi",
+              elementType: "labels.text",
+              stylers: [
+                { visibility: "off" }
+              ]
+            },{
+              featureType: "road",
+              elementType: "geometry",
+              stylers: [
+                { visibility: "off" }
+              ]
+            },{
+              featureType: "administrative.locality",
+              elementType: "labels",
+              stylers: [
+                { visibility: "off" }
+              ]
+            },{
+              featureType: "landscape",
+              elementType: "geometry",
+              stylers: [
+                { gamma: 0.3 },
+                { saturation: 65 },
+                { hue: "#6eff00" },
+                { lightness: -25 }
+              ]
+            },{
+              featureType: "administrative.country",
+              elementType: "labels.text.stroke",
+              stylers: [
+                { visibility: "off" }
+              ]
+            },{
+              featureType: "administrative",
+              elementType: "geometry.stroke",
+              stylers: [
+                { weight: 3.4 },
+                { lightness: -39 }
+              ]
+            },{
+              featureType: "administrative.country",
+              elementType: "labels",
+              stylers: [
+                { color: "#efffff" }
+              ]
+            }
+        ], {name: 'wildlife'});
+        
+        
+        var latlng = {lat: parseInt(latp), lng: parseInt(lngp)},
+        
+        zoom = $('#name').is(':empty') ? 1 : 4;
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: latlng,
+            zoom: 4,
+            mapTypeControlOptions: {
+                mapTypeIds: [google.maps.MapTypeId.ROADMAP, 'wildlife']
+            }
+        });  
+        
+         var marker = new google.maps.Marker({
+            position: latlng,
+            map: map
+        });
+        
+        map.mapTypes.set('wildlife', wildlifeMapType);
+        map.setMapTypeId('wildlife');
+    };
+</script>
+<script async defer
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBWh3YIEd8NJSj7tmUKiCECvF2TAxqzOBE&callback=initMap">
+</script>
+
+    <form action="#">
+        <input type="text" id="searchfield" autocomplete="off" placeholder="search">
+    </form>
+    <div id="map"></div>
+    
+    <div>
+        <p class="countrytitle"></p>
+    </div>
+
+    <div id="name"></div>
+    <div id="fullname"></div>
+    <div id="capital"></div>
+    <div id="area"></div>
+    <div id="currency"></div>
+    
+    <div id="images">
+      <div id="flag"></div>
+      <div id="image1"></div>
+      <div id="image2"></div>
+      <div id="image3"></div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,10 @@
+   <!--
+   SELECT ip, SUBSTRING_INDEX(ip,'.',1) AS part1, 
+SUBSTRING_INDEX(SUBSTRING_INDEX(ip,'.',2),'.',-1) AS part2, 
+SUBSTRING_INDEX(SUBSTRING_INDEX(ip,'.',-2),'.',1) AS part3, 
+SUBSTRING_INDEX(ip,'.',-1) AS part4  FROM log_file;
+https://community.c9.io/t/connecting-php-to-mysql/1606
+https://github.com/mledoze/countries/blob/master/README.md
+http://www.w3schools.com/php/php_ajax_livesearch.asp
+https://developer.mozilla.org/en-US/docs/AJAX/Getting_Started
+   -->
